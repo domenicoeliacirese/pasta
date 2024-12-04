@@ -507,7 +507,20 @@ class Pasta:
 
         return lp, up
 
-    
+    def multishot_inference(self, from_string : str = "") -> 'tuple[float,float]':
+        '''
+        Multi-shot inference
+        '''
+        self.setup_interface(from_string)
+        # self.interface.identify_useless_variables()
+        self.interface.compute_probabilities_multishot()
+        lp = self.interface.lower_probability_query
+        up = self.interface.upper_probability_query
+
+        check_lp_up(lp, up)
+
+        return lp, up
+
     def _get_cnf_aspmc(self, from_string : str = ""):
         '''
         Gets the CNF representation of the program from aspmc.
@@ -826,6 +839,8 @@ def main():
             upper_p = prob
         elif args.aspmc:
             lower_p, upper_p = pasta_solver.inference_aspmc()
+        elif args.multi_shot:
+            lower_p, upper_p = pasta_solver.multishot_inference()
         else:
             lower_p, upper_p = pasta_solver.inference()
         if args.lpmln and args.all:

@@ -63,7 +63,6 @@ def parse_args_wrapper():
             default: false",
         action="store_true"
     )
-
     # approximate
     command_parser.add_argument(
         "--approximate",
@@ -343,6 +342,12 @@ def parse_args_wrapper():
         type = int,
         default=1_000_000
     )
-
+    # Multi-shot ASP solving 
+    command_parser.add_argument(
+        "--multi-shot",
+        help="Uses multi-shot ASP solving",
+        action="store_true",
+        default=False
+    )
 
     return command_parser.parse_args()

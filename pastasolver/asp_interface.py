@@ -297,7 +297,15 @@ class AspInterface:
             self.lower_probability_query = self.lower_probability_query / self.normalizing_factor
             self.upper_probability_query = self.upper_probability_query / self.normalizing_factor
 
-
+    def compute_probabilities_multishot(self) -> None:
+        '''
+        Computes the lower and upper bound for the query using multi-shot.
+        '''
+        # hard-coded results
+        self.lower_probability_query = 0.4
+        self.upper_probability_query = 0.6
+        # completare la funzione 
+        
     def compute_mpe_asp_solver(self, one : bool = False) -> 'tuple[str,bool]':
         '''
         Computes the upper MPE state by using an ASP solver.
