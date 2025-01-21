@@ -310,15 +310,14 @@ class AspInterface:
 
         ctl = self.init_clingo_ctl(clingo_arguments, clauses)
 
-        ctl.add("base", [], "#external n.")
-        ctl.add("base", [], ":- #count{X : pf(X,_)} != n.")
-
         for i, fact in enumerate(self.prob_facts_dict):
             ctl.add("base", [], f"pf({i}, {fact}):- {fact}.")
+
         ctl.ground([("base", [])])
 
         for n in range(0, len(self.prob_facts_dict) + 1):
-            ctl.assign_external(clingo.Function("n"), n)
+            ctl.add("iteration", [], f":- #count{{X : pf(X,_)}} != {n}.")
+            ctl.ground([("iteration", [])])
 
             with ctl.solve(yield_=True) as handle:
                 for m in handle:
@@ -326,13 +325,12 @@ class AspInterface:
                     self.computed_models += 1
                 handle.get()
 
-            ctl.assign_external(clingo.Function("n"), None)
+            ctl.cleanup()
 
         self.lower_probability_query, self.upper_probability_query = self.model_handler.compute_lower_upper_probability(self.k_credal)
         if self.normalizing_factor == 0:
             self.lower_probability_query = 1
             self.upper_probability_query = 1
-            # utils.print_warning("No worlds have > 1 answer sets")
         else:
             self.lower_probability_query = self.lower_probability_query / self.normalizing_factor
             self.upper_probability_query = self.upper_probability_query / self.normalizing_factor
