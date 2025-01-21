@@ -45,7 +45,8 @@ class Pasta:
         naive_dt : bool = False,
         lpmln : bool = False,
         processes : int = 1,
-        aspmc : bool = False
+        aspmc : bool = False,
+        multi_shot : bool = False
         ) -> None:
         self.filename = filename
         self.query = query
@@ -68,6 +69,7 @@ class Pasta:
         self.lpmln : bool = lpmln
         self.processes : int = processes
         self.aspmc : bool = aspmc
+        self.muti_shot : bool = multi_shot
         self.interface : AspInterface
         self.parser : PastaParser
 
@@ -338,7 +340,7 @@ class Pasta:
         '''
         Setup clingo interface
         '''
-        self.parser = PastaParser(self.filename, self.query, self.evidence, self.for_asp_solver, self.naive_dt, self.lpmln)
+        self.parser = PastaParser(self.filename, self.query, self.evidence, self.for_asp_solver, self.naive_dt, self.lpmln, self.muti_shot)
         self.parser.parse(from_string, approx)
 
         if self.minimal is False:
@@ -730,7 +732,8 @@ def main():
                          naive_dt=args.dtn,
                          lpmln=args.lpmln,
                          processes=args.processes,
-                         aspmc=args.aspmc
+                         aspmc=args.aspmc,
+                         multi_shot=args.multi_shot
                         )
 
     if args.convert:

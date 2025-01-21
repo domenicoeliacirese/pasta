@@ -302,31 +302,18 @@ class AspInterface:
         Performs multi-shot inference by calling Clingo multiple times in each iteration. 
         At each iteration, it considers an increasing number of probabilistic facts being true.
         """
-        clingo_arguments : 'list[str]' = ["0","-Wnone"]
-        clingo_arguments.append("--project")
-        clauses = self.asp_program
-        for c in self.cautious_consequences:
-            clauses.append(f':- not {c}.')
+        clingo_arguments : 'list[str]' = ["0","-Wnone","--project"]
 
-        ctl = self.init_clingo_ctl(clingo_arguments, clauses)
-
-        ctl.add("base", [], "#external n.")
-        ctl.add("base", [], ":- #count{X : pf(X,_)} != n.")
-
-        for i, fact in enumerate(self.prob_facts_dict):
-            ctl.add("base", [], f"pf({i}, {fact}):- {fact}.")
-        ctl.ground([("base", [])])
 
         for n in range(0, len(self.prob_facts_dict) + 1):
-            ctl.assign_external(clingo.Function("n"), n)
+            r = ":- #count{X : __pf__(X)} != " + f"{n}."
+            ctl = self.init_clingo_ctl(clingo_arguments, self.asp_program + [r])
 
-            with ctl.solve(yield_=True) as handle:
+            with ctl.solve(yield_=True) as handle: # type: ignore
                 for m in handle:
                     self.model_handler.add_value(str(m))
                     self.computed_models += 1
                 handle.get()
-
-            ctl.assign_external(clingo.Function("n"), None)
 
         self.lower_probability_query, self.upper_probability_query = self.model_handler.compute_lower_upper_probability(self.k_credal)
         if self.normalizing_factor == 0:

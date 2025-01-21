@@ -116,7 +116,8 @@ class PastaParser:
         evidence : str = "",
         for_asp_solver : bool = False,
         naive_dt : bool = False,
-        lpmln : bool = False
+        lpmln : bool = False,
+        multi_shot : bool = False
         ) -> None:
         self.filename : str = filename
         self.query : str = query
@@ -135,6 +136,7 @@ class PastaParser:
         self.lpmln : bool = lpmln
         self.for_asp_solver : bool = for_asp_solver
         self.naive_dt : bool = naive_dt
+        self.multi_shot : bool = multi_shot
         self.optimizable_facts : 'dict[str,tuple[float,float]]' = {}
         self.reducible_facts : 'dict[str,float]' = {}
         self.objective_function : str = ""
@@ -289,6 +291,8 @@ class PastaParser:
                 else:
                     probability, fact = check_consistent_prob_fact(line.replace(' ',''), self.lpmln)
                     self.add_probabilistic_fact(fact,probability)
+                    if self.multi_shot:
+                        self.lines_prob.append(f"__pf__({fact}):- {fact}.")
                     # n_probabilistic_facts = n_probabilistic_facts + 1
             elif ':' in line and ((":gaussian(" in line) or (":exponential(" in line) or (":uniform(" in line) or (":gamma(" in line)):
                 # continuous fact with 2 arguments
@@ -467,6 +471,11 @@ class PastaParser:
 
         if not self.query and len(self.decision_facts) == 0:
             utils.print_error_and_exit("Missing query")
+        
+        # TODO: do this to improve
+        # if self.multi_shot:
+        #     self.lines_prob.append("#external n.")
+        #     self.lines_prob.append(":- #count{X : __pf__(X)} != n.")
 
         external_names : 'list[str]' = []
         original_names : 'list[str]' = []
@@ -757,7 +766,7 @@ class PastaParser:
         key = term.split('.')[0]
         if key in self.probabilistic_facts and self.probabilistic_facts[key] != prob:
             utils.error_prob_fact_twice(key, prob, self.probabilistic_facts[key])
-        self.probabilistic_facts[key] = float(prob)
+        self.probabilistic_facts[key] = float(prob)            
 
 
     def reconstruct_parameters(self, learned_prob_facts_dict : 'dict[str,float]'):
