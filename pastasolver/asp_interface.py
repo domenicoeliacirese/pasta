@@ -319,7 +319,6 @@ class AspInterface:
         if self.normalizing_factor == 0:
             self.lower_probability_query = 1
             self.upper_probability_query = 1
-            # utils.print_warning("No worlds have > 1 answer sets")
         else:
             self.lower_probability_query = self.lower_probability_query / self.normalizing_factor
             self.upper_probability_query = self.upper_probability_query / self.normalizing_factor
